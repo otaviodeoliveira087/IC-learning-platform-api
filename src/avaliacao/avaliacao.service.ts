@@ -1665,7 +1665,7 @@ export class AvaliacaoService {
 
     }
 
-    async solicitarRevisao(tentativaId: number, usuarioId: number) {
+    async solicitarRevisao(tentativaId: number, usuarioId: number, justificativa?: string) {
 
         const tentativa =
             await this.prisma.ten_tentativa.findUnique({
@@ -1777,6 +1777,9 @@ export class AvaliacaoService {
 
                 ava_id:
                     tentativa.ava_avaliacao.ava_id,
+
+                rev_motivo:
+                    justificativa || null,
 
                 rev_status:
                     "PENDENTE",

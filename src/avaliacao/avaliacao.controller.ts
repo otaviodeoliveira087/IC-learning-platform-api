@@ -117,18 +117,16 @@ export class AvaliacaoController {
 
     @Post('tentativas/:tentativaId/revisao')
     @UseGuards(JwtAuthGuard)
-    async solicitarRevisao(
-        @Param('tentativaId', ParseIntPipe)
-        tentativaId: number,
-
-        @Req() req: any,
+    async solicitarRevisao(@Param('tentativaId', ParseIntPipe) tentativaId: number, @Req() req: any,
     ) {
 
         const usuarioId = req.user.usu_id;
+        const justificativa = req.body.justificativa;
 
         return this.service.solicitarRevisao(
             tentativaId,
             usuarioId,
+            justificativa
         );
 
     }
