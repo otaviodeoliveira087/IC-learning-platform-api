@@ -42,63 +42,89 @@ export class UsuarioService {
         });
     }
 
-    async createUserProfessor(data: CreateUserProfessorDto, file: Express.Multer.File): Promise<usu_usuario> {
+    async createUserProfessor(
+        data: CreateUserProfessorDto,
+        file: Express.Multer.File,
+    ): Promise<usu_usuario> {
 
+        // Verifica se o currículo foi enviado
+        if (!file) {
+            throw new BadRequestException(
+                'Currículo é obrigatório',
+            );
+        }
+
+        // Aceita somente arquivos PDF
+        if (file.mimetype !== 'application/pdf') {
+            throw new BadRequestException(
+                'Apenas arquivos PDF são permitidos',
+            );
+        }
+
+        // Verifica se o usuário já existe
+        const usuarioExistente =
+            await this.prismaService.usu_usuario.findUnique({
+                where: {
+                    usu_email: data.usu_email,
+                },
+            });
+
+        if (usuarioExistente) {
+            throw new ConflictException(
+                'Usuário já cadastrado',
+            );
+        }
+
+        const bucket = process.env.AWS_BUCKET_NAME;
+        const region = process.env.AWS_REGION;
+
+        if (!bucket || !region) {
+            throw new Error(
+                'AWS_BUCKET_NAME e AWS_REGION devem estar configurados.',
+            );
+        }
+
+        // Define o caminho do arquivo no S3
         const fileName =
             `curriculos/${uuidv4()}-${file.originalname}`;
 
-        if (!file) {
-            throw new BadRequestException(
-                'Currículo é obrigatório'
-            );
-        }
-
-        if (file.mimetype !== 'application/pdf') {
-            throw new BadRequestException(
-                'Apenas arquivos PDF são permitidos'
-            );
-        }
-
+        // Envia o currículo para o Amazon S3
         await s3.send(
             new PutObjectCommand({
-                Bucket: process.env.AWS_BUCKET_NAME,
+                Bucket: bucket,
                 Key: fileName,
                 Body: file.buffer,
                 ContentType: file.mimetype,
             }),
         );
 
+        // Gera a URL do currículo
         const pdfUrl =
-            `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+            `https://${bucket}.s3.${region}.amazonaws.com/${fileName}`;
 
-        const usuarioExistente = await this.prismaService.usu_usuario.findUnique({
-            where: { usu_email: data.usu_email }
-        });
+        // Criptografa a senha
+        const hashPassword = await bcrypt.hash(
+            data.usu_senha,
+            10,
+        );
 
-        if (usuarioExistente) {
-            throw new ConflictException('Usuário já cadastrado');
-        }
-
-        const hashPassword = await bcrypt.hash(data.usu_senha, 10);
-
+        // Cadastra o professor como pendente
         return this.prismaService.usu_usuario.create({
             data: {
                 usu_nome: data.usu_nome,
                 usu_email: data.usu_email,
                 usu_senha: hashPassword,
                 usu_proposta: data.usu_proposta,
-
                 usu_curriculo: pdfUrl,
-
                 usu_lattes: data.usu_lattes,
                 usu_status: 'PENDENTE',
 
                 tiu_tipo_usuario: {
                     connect: {
-                        tiu_id: 2
-                    }
-                }
-            }
+                        tiu_id: 2,
+                    },
+                },
+            },
         });
     }
 

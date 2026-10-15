@@ -19,13 +19,11 @@ export class UsuarioController {
         return this.usuarioService.createUser(createUserDto)
     }
 
-    @Post('/register-professor')
+    @Post('register-professor')
     @UseInterceptors(FileInterceptor('file'))
-    createProfessor(
+    async createUserProfessor(
+        @UploadedFile() file: Express.Multer.File,
         @Body() data: CreateUserProfessorDto,
-
-        @UploadedFile()
-        file: Express.Multer.File,
     ) {
         return this.usuarioService.createUserProfessor(
             data,

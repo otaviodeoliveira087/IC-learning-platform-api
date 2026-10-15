@@ -5,6 +5,7 @@ import {
   IsString,
   MinLength,
   MaxLength,
+  Matches,
 } from 'class-validator';
 
 export class CreateUserProfessorDto {
@@ -18,8 +19,11 @@ export class CreateUserProfessorDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(12, {
-    message: 'A senha deve possuir pelo menos 12 caracteres',
+  @MinLength(6, {
+    message: 'A senha deve possuir pelo menos 6 caracteres\n',
+  })
+  @Matches(/[^A-Za-z0-9]/, {
+    message: 'A senha deve possuir pelo menos um caractere especial\n',
   })
   @MaxLength(72, {
     message: 'A senha deve possuir no máximo 72 caracteres',
