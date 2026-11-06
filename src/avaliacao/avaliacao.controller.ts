@@ -24,11 +24,7 @@ export class AvaliacaoController {
         private readonly service: AvaliacaoService
     ) { }
 
-
-    // ==========================================
     // CRIAR AVALIAÇÃO
-    // ==========================================
-
     @Post('register')
     create(
         @Body() dto: CreateAvaliacaoDto
@@ -36,11 +32,7 @@ export class AvaliacaoController {
         return this.service.createAvaliacao(dto);
     }
 
-
-    // ==========================================
     // BUSCAR AVALIAÇÃO
-    // ==========================================
-
     @Get(':id')
     findOne(
         @Param('id', ParseIntPipe) id: number
@@ -48,11 +40,7 @@ export class AvaliacaoController {
         return this.service.findAvaliacaoById(id);
     }
 
-
-    // ==========================================
     // INICIAR PROVA
-    // ==========================================
-
     @Post(':avaId/iniciar')
     @UseGuards(JwtAuthGuard)
     iniciarProva(
@@ -67,11 +55,7 @@ export class AvaliacaoController {
 
     }
 
-
-    // ==========================================
     // BUSCAR TENTATIVA
-    // ==========================================
-
     @Get('tentativa/:id')
     @UseGuards(JwtAuthGuard)
     async buscarTentativa(
@@ -94,11 +78,7 @@ export class AvaliacaoController {
         return this.service.qtdTentativas(usuarioId, id);
 
     }
-
-    // ==========================================
     // RESULTADO DA TENTATIVA
-    // ==========================================
-
     @Get('resultado/:id')
     @UseGuards(JwtAuthGuard)
     async buscarResultado(
@@ -110,11 +90,7 @@ export class AvaliacaoController {
 
     }
 
-
-    // ==========================================
     // SOLICITAR REVISÃO
-    // ==========================================
-
     @Post('tentativas/:tentativaId/revisao')
     @UseGuards(JwtAuthGuard)
     async solicitarRevisao(@Param('tentativaId', ParseIntPipe) tentativaId: number, @Req() req: any,
@@ -131,11 +107,7 @@ export class AvaliacaoController {
 
     }
 
-
-    // ==========================================
     // FINALIZAR PROVA
-    // ==========================================
-
     @Post('tentativa/:id/finalizar')
     @UseGuards(JwtAuthGuard)
     finalizar(
